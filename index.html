@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>钻石版分布地图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; }
+
+  #map { position: absolute; inset: 0; }
+
+  /* ========== 抽屉侧边栏 ========== */
+  #sidebar {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 380px; max-width: 86vw;
+    background: #fff;
+    display: flex; flex-direction: column;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(.25,.8,.25,1);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 999;
+    opacity: 0; visibility: hidden;
+    transition: opacity .25s, visibility .25s;
+  }
+  #backdrop.open { opacity: 1; visibility: visible; }
+
+  .sidebar-header {
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .sidebar-header h1 { font-size: 17px; font-weight: 700; flex: 1; }
+  .sidebar-header .sub { font-size: 11px; opacity: .9; margin-top: 2px; }
+  .header-text { flex: 1; }
+  .header-close {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none; color: #fff; font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .header-close:hover { background: rgba(255,255,255,0.3); }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 12px 14px; background: #fafbfc;
+    border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 18px; font-weight: 700; }
+  .stat-label { font-size: 10px; color: #999; margin-top: 2px; }
+  .stat.s1 .stat-num { color: #ff4d4f; }
+  .stat.s2 .stat-num { color: #1890ff; }
+  .stat.s3 .stat-num { color: #faad14; }
+  .stat.s4 .stat-num { color: #52c41a; }
+
+  .search-box { padding: 10px 14px; background: #fff; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+  .search-box input {
+    width: 100%; padding: 8px 12px;
+    background: #f5f5f5; border: 1px solid #e8e8e8;
+    border-radius: 8px; color: #333; font-size: 13px;
+    transition: all .2s;
+  }
+  .search-box input:focus { outline: none; border-color: #667eea; background: #fff; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+
+  .filter-chips { display: flex; gap: 6px; padding: 0 14px 10px; background: #fff; flex-wrap: wrap; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+  .chip {
+    padding: 4px 11px; border-radius: 14px; font-size: 12px;
+    background: #f5f5f5; color: #666; cursor: pointer;
+    transition: all .2s; border: 1px solid transparent;
+  }
+  .chip:hover { background: #e8e8e8; }
+  .chip.active { background: #667eea; color: #fff; border-color: #667eea; }
+
+  .list-wrap { flex: 1; overflow-y: auto; background: #fff; -webkit-overflow-scrolling: touch; }
+  .list-wrap::-webkit-scrollbar { width: 6px; }
+  .list-wrap::-webkit-scrollbar-track { background: #f5f5f5; }
+  .list-wrap::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 3px; }
+
+  .list-item {
+    padding: 11px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer; transition: all .15s;
+  }
+  .list-item:hover { background: #fafafa; }
+  .list-item.active { background: #f0f5ff; border-left: 3px solid #667eea; padding-left: 13px; }
+  .list-item .row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .list-item .num {
+    width: 26px; height: 26px; border-radius: 50%;
+    color: #fff; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .list-item .num.d-城中区 { background: #ff4d4f; }
+  .list-item .num.d-城西区 { background: #1890ff; }
+  .list-item .num.d-城东区 { background: #faad14; }
+  .list-item .num.d-城北区 { background: #52c41a; }
+  .list-item .name { font-size: 14px; font-weight: 600; color: #333; flex: 1; }
+  .list-item .dist-tag {
+    font-size: 10px; padding: 2px 6px; border-radius: 4px;
+    background: #f0f5ff; color: #667eea; flex-shrink: 0;
+  }
+  .list-item .addr { font-size: 12px; color: #999; line-height: 1.5; padding-left: 30px; }
+  .empty { padding: 40px 20px; text-align: center; color: #bbb; font-size: 13px; }
+
+  /* 自定义标记 */
+  .custom-marker { background: none; border: none; cursor: pointer; }
+  .marker-inner {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 12px; font-weight: 700;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: all .2s;
+  }
+  .marker-inner:hover { transform: scale(1.2); }
+  .marker-inner.active {
+    transform: scale(1.35);
+    border-color: #ffd700;
+    box-shadow: 0 0 14px rgba(102,126,234,0.7);
+  }
+  .marker-inner.d-城中区 { background: #ff4d4f; }
+  .marker-inner.d-城西区 { background: #1890ff; }
+  .marker-inner.d-城东区 { background: #faad14; }
+  .marker-inner.d-城北区 { background: #52c41a; }
+
+  /* 信息窗 */
+  .amap-info-content { padding: 12px 14px !important; border-radius: 10px !important; min-width: 200px; }
+  .amap-info-close { top: 6px !important; right: 8px !important; }
+  .iw-name { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
+  .iw-dist {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; background: #f0f5ff; color: #667eea; margin-bottom: 8px;
+  }
+  .iw-addr { font-size: 12px; color: #666; line-height: 1.6; margin-bottom: 10px; }
+  .iw-actions { display: flex; gap: 6px; }
+  .iw-actions a {
+    flex: 1; text-align: center; padding: 7px 0;
+    background: #667eea; color: #fff; text-decoration: none;
+    border-radius: 6px; font-size: 12px; transition: background .2s;
+  }
+  .iw-actions a:hover { background: #5a6fd6; }
+  .iw-actions a.alt { background: #f5f5f5; color: #666; }
+  .iw-actions a.alt:hover { background: #e8e8e8; }
+
+  /* ========== 浮动按钮（FAB） ========== */
+  .fab {
+    position: absolute; z-index: 998;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: #fff; border: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    color: #333; font-size: 20px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .fab:active { transform: scale(0.92); }
+  .fab:hover { background: #f5f5f5; }
+
+  #fabMenu { top: 14px; left: 14px; }
+  #fabFit { bottom: 80px; right: 14px; background: #667eea; color: #fff; font-size: 22px; }
+  #fabFilter { bottom: 20px; right: 14px; }
+
+  /* 过滤弹出层 */
+  .filter-popup {
+    position: absolute; bottom: 76px; right: 14px;
+    background: #fff; border-radius: 12px;
+    padding: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    z-index: 998; display: none;
+    flex-direction: column; gap: 6px;
+    min-width: 140px;
+  }
+  .filter-popup.open { display: flex; }
+  .filter-popup .chip { width: 100%; text-align: center; padding: 8px 12px; }
+
+  /* 图例 */
+  .map-legend {
+    position: absolute; top: 14px; right: 14px; z-index: 997;
+    background: rgba(255,255,255,0.95); padding: 8px 12px;
+    border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    backdrop-filter: blur(4px); display: none;
+  }
+  .map-legend h4 { color: #333; font-size: 11px; margin-bottom: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #666; margin-bottom: 1px; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  /* ========== 桌面端样式（≥768px） ========== */
+  @media (min-width: 768px) {
+    #sidebar {
+      transform: translateX(0);  /* 桌面端默认显示 */
+      box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+    }
+    #sidebar.collapsed { transform: translateX(-100%); }
+    #sidebar.collapsed .header-close { display: none; }
+    #backdrop { display: none; }  /* 桌面端不需要遮罩 */
+    #fabMenu { display: none; }   /* 桌面端用sidebar自带的关闭按钮 */
+    #fabFit, #fabFilter { display: none; }  /* 桌面端用地图自带控件 */
+    .map-legend { display: block; }
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="header-text">
+      <h1>🎮 西宁电竞门店分布</h1>
+      <div class="sub">共 24 家门店 · 点击查看详情</div>
+    </div>
+    <button class="header-close" id="closeBtn" aria-label="关闭">×</button>
+  </div>
+  <div class="stats">
+    <div class="stat s1"><div class="stat-num" id="c-城中区">0</div><div class="stat-label">城中区</div></div>
+    <div class="stat s2"><div class="stat-num" id="c-城西区">0</div><div class="stat-label">城西区</div></div>
+    <div class="stat s3"><div class="stat-num" id="c-城东区">0</div><div class="stat-label">城东区</div></div>
+    <div class="stat s4"><div class="stat-num" id="c-城北区">0</div><div class="stat-label">城北区</div></div>
+  </div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 搜索门店名或地址...">
+  </div>
+  <div class="filter-chips" id="filterChips">
+    <span class="chip active" data-dist="all">全部</span>
+    <span class="chip" data-dist="城中区">城中区</span>
+    <span class="chip" data-dist="城西区">城西区</span>
+    <span class="chip" data-dist="城东区">城东区</span>
+    <span class="chip" data-dist="城北区">城北区</span>
+  </div>
+  <div class="list-wrap" id="listWrap"><div class="empty">加载地图中...</div></div>
+</aside>
+
+<div id="backdrop"></div>
+
+<!-- 移动端浮动按钮 -->
+<button class="fab" id="fabMenu" aria-label="菜单">☰</button>
+<button class="fab" id="fabFit" aria-label="全览" title="显示全部">⌖</button>
+<button class="fab" id="fabFilter" aria-label="筛选">⚲</button>
+
+<!-- 移动端筛选弹层 -->
+<div class="filter-popup" id="filterPopup">
+  <span class="chip" data-dist="all">全部</span>
+  <span class="chip" data-dist="城中区">城中区</span>
+  <span class="chip" data-dist="城西区">城西区</span>
+  <span class="chip" data-dist="城东区">城东区</span>
+  <span class="chip" data-dist="城北区">城北区</span>
+</div>
+
+<!-- 图例 -->
+<div class="map-legend" id="mapLegend">
+  <h4>图例</h4>
+  <div class="legend-item"><span class="legend-dot" style="background:#ff4d4f"></span>城中区</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#1890ff"></span>城西区</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#faad14"></span>城东区</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#52c41a"></span>城北区</div>
+</div>
+
+<script src="https://webapi.amap.com/maps?v=2.0&key=a01878acdecff250a4b69513defde872&plugin=AMap.ToolBar,AMap.Scale"></script>
+<script>
+// =================== 门店数据（含坐标 - 已校正） ===================
+const STORES = [
+  // 城中区
+  { name:'爱陌香格里拉店',                addr:'城中区香格里拉路 香格里拉城市花园6期',        dist:'城中区', lat:36.609, lng:101.755 },
+  { name:'凡天电竞（胜利路店）胜利路巅峰',   addr:'城中区同仁路46号万兴大厦1号楼',              dist:'城中区', lat:36.624, lng:101.775 },
+  { name:'心极速网吧',                    addr:'城中区南京路42号',                          dist:'城中区', lat:36.547, lng:101.704 },
+  { name:'奥朵电竞酒店',                  addr:'城中区南山路15号1号楼1121号',                dist:'城中区', lat:36.607, lng:101.781 },
+  { name:'新千外星人电竞',                addr:'城中区建国南路66号新千国际广场20号楼F5层',   dist:'城中区', lat:36.616, lng:101.789 },
+  // 城西区
+  { name:'凡天电竞（宜博总店）精领酒店二医院巅峰', addr:'城西区古城台街道同仁路46号万兴大厦',     dist:'城西区', lat:36.624, lng:101.776 },
+  { name:'弈客电竞',                     addr:'城西区西关大街84号2号楼84-8号',               dist:'城西区', lat:36.623, lng:101.765 },
+  { name:'横贯（海湖店）',                  addr:'城西区五四西路唐道637步行街B3-402商铺',       dist:'城西区', lat:36.643, lng:101.716 },
+  { name:'横贯电竞(海湖万达五矿巅峰店)',    addr:'城西区五四西路66号4号楼2层66-254、66-256号', dist:'城西区', lat:36.645, lng:101.722 },
+  { name:'凡天网咖（万达店）巅峰',           addr:'城西区海湖万达4楼 卓威电竞巅峰电竞',           dist:'城西区', lat:36.643, lng:101.716 },
+  { name:'水沐清泉电竞酒店',               addr:'城西区五四西路71-197号',                     dist:'城西区', lat:36.646, lng:101.709 },
+  { name:'赛铂电竞(力盟店)',               addr:'城西区五四大街41号力盟商业巷步行街7号楼2楼202', dist:'城西区', lat:36.621, lng:101.770 },
+  { name:'新华百货巅峰',                   addr:'城西区五四大街45号新华百货CCmallBT馆4F',     dist:'城西区', lat:36.623, lng:101.774 },
+  { name:'巅峰电竞王府井店',               addr:'城西区西大街40号王府井B馆5楼',                dist:'城西区', lat:36.622, lng:101.778 },
+  { name:'横贯电竞歪歪楼店',               addr:'城西区五四西路75号1号楼二层 歪歪楼',           dist:'城西区', lat:36.642, lng:101.740 },
+  // 城东区
+  { name:'星慕电竞酒店',                   addr:'城东区金都大厦2号楼',                        dist:'城东区', lat:36.620, lng:101.808 },
+  { name:'横贯（夏都店）',                   addr:'城东区夏都大街188号喆啡酒店东区负1层',       dist:'城东区', lat:36.613, lng:101.822 },
+  { name:'鹊踏枝电竞酒店',                 addr:'城东区建国大街57号东区2A号楼24层',            dist:'城东区', lat:36.615, lng:101.813 },
+  { name:'PG电竞酒店',                     addr:'城东区七一东路锦峰滨河苑21号楼B座16层',      dist:'城东区', lat:36.617, lng:101.814 },
+  // 城北区
+  { name:'义乌网咖（西钢店）',               addr:'城北区柴达木路52号',                          dist:'城北区', lat:36.665, lng:101.675 },
+  { name:'义乌网咖（民惠店）',               addr:'城北区门源路10号',                            dist:'城北区', lat:36.655, lng:101.775 },
+  { name:'义乌网咖（尚城店）',               addr:'城北区朝阳东路57号',                          dist:'城北区', lat:36.652, lng:101.792 },
+  { name:'义乌中海店',                     addr:'城北区中海河山郡西区(门源路北50米)',            dist:'城北区', lat:36.659, lng:101.779 },
+  { name:'北川横贯店',                     addr:'城北区北川万达广场2层 横贯电竞(北川万达大学城店)', dist:'城北区', lat:36.684, lng:101.763 }
+];
+
+// =================== 状态 ===================
+let map, infoWindow, activeIdx = -1;
+let currentFilter = 'all', currentSearch = '';
+let allMarkers = [];
+
+// =================== 统计 ===================
+function updateStats() {
+  const c = { '城中区':0,'城西区':0,'城东区':0,'城北区':0 };
+  STORES.forEach(s => c[s.dist]++);
+  for (const k in c) document.getElementById('c-'+k).textContent = c[k];
+}
+
+// =================== 渲染列表 ===================
+function renderList() {
+  const wrap = document.getElementById('listWrap');
+  const filtered = STORES.filter(s => {
+    const okDist = currentFilter === 'all' || s.dist === currentFilter;
+    const okSearch = !currentSearch || s.name.includes(currentSearch) || s.addr.includes(currentSearch);
+    return okDist && okSearch;
+  });
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="empty">暂无匹配的门店</div>';
+    return;
+  }
+  wrap.innerHTML = filtered.map(s => {
+    const idx = STORES.indexOf(s);
+    return `
+    <div class="list-item ${idx === activeIdx ? 'active' : ''}" data-id="${idx}" onclick="focusStore(${idx})">
+      <div class="row1">
+        <span class="num d-${s.dist}">${idx + 1}</span>
+        <span class="name">${s.name}</span>
+        <span class="dist-tag">${s.dist}</span>
+      </div>
+      <div class="addr">${s.addr}</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  currentSearch = e.target.value.trim();
+  renderList();
+});
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    currentFilter = c.dataset.dist;
+    renderList();
+    // 移动端选完关闭弹层
+    if (window.innerWidth < 768) {
+      document.getElementById('filterPopup').classList.remove('open');
+    }
+  });
+});
+
+// =================== 抽屉控制 ===================
+const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('backdrop');
+const isMobile = () => window.innerWidth < 768;
+
+function openDrawer() {
+  sidebar.classList.add('open');
+  if (isMobile()) backdrop.classList.add('open');
+  setTimeout(() => map && map.resize(), 320);
+}
+function closeDrawer() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('open');
+  setTimeout(() => map && map.resize(), 320);
+}
+
+document.getElementById('fabMenu').addEventListener('click', openDrawer);
+document.getElementById('closeBtn').addEventListener('click', closeDrawer);
+backdrop.addEventListener('click', closeDrawer);
+
+// =================== 浮动按钮 ===================
+document.getElementById('fabFit').addEventListener('click', fitAll);
+document.getElementById('fabFilter').addEventListener('click', () => {
+  document.getElementById('filterPopup').classList.toggle('open');
+});
+// 同步移动端弹层与主筛选
+document.querySelectorAll('#filterPopup .chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => {
+      if (x.dataset.dist === c.dataset.dist) x.classList.add('active');
+      else x.classList.remove('active');
+    });
+    currentFilter = c.dataset.dist;
+    renderList();
+  });
+});
+
+// =================== 地图初始化 ===================
+function initMap() {
+  map = new AMap.Map('map', {
+    center: [101.78, 36.63],
+    zoom: 12,
+    mapStyle: 'amap://styles/light',
+    features: ['bg','road','point']
+  });
+
+  infoWindow = new AMap.InfoWindow({ offset: new AMap.Pixel(0, -32) });
+
+  STORES.forEach((s, i) => addMarker(s, i));
+  fitAll();
+  renderList();
+}
+
+// =================== 添加标记 ===================
+function addMarker(store, idx) {
+  const content = `
+    <div class="custom-marker" data-id="${idx}">
+      <div class="marker-inner d-${store.dist}">${idx + 1}</div>
+    </div>`;
+  const marker = new AMap.Marker({
+    position: [store.lng, store.lat],
+    content: content,
+    offset: new AMap.Pixel(-15, -15),
+    extData: { id: idx }
+  });
+  marker.on('click', () => {
+    selectStore(idx);
+    showInfo(store);
+    // 移动端点击标记后关闭抽屉
+    if (isMobile()) closeDrawer();
+  });
+  marker.setMap(map);
+  allMarkers.push(marker);
+}
+
+// =================== 信息窗 ===================
+function showInfo(store) {
+  const nameEnc = encodeURIComponent(store.name);
+  const addrEnc = encodeURIComponent(store.addr);
+  const mapUrl = `https://uri.amap.com/marker?position=${store.lng},${store.lat}&name=${nameEnc}&src=yungameweb`;
+  const searchUrl = `https://ditu.amap.com/search?query=${addrEnc}&city=630100`;
+  infoWindow.setContent(`
+    <div style="padding:2px 0">
+      <div class="iw-name">${store.name}</div>
+      <span class="iw-dist">${store.dist}</span>
+      <div class="iw-addr">📍 ${store.addr}</div>
+      <div class="iw-actions">
+        <a href="${mapUrl}" target="_blank">📍 高德查看</a>
+        <a href="${searchUrl}" target="_blank" class="alt">🔍 搜索详情</a>
+      </div>
+    </div>`);
+  infoWindow.open(map, [store.lng, store.lat]);
+}
+
+// =================== 聚焦门店 ===================
+function focusStore(id) {
+  const store = STORES[id];
+  if (!store) return;
+  selectStore(id);
+  // 先移到目标位置，等动画完成后再弹窗，避免信息窗干扰居中
+  map.setZoomAndCenter(16, [store.lng, store.lat]);
+  setTimeout(() => {
+    // 修正侧边栏偏移：让标记在"可视区域"正中，而非地图容器正中
+    const sidebarEl = document.getElementById('sidebar');
+    const isSidebarOpen = sidebarEl.classList.contains('open') || !isMobile();
+    const sidebarW = isSidebarOpen ? sidebarEl.offsetWidth : 0;
+    if (sidebarW > 0) {
+      const mapW = map.getContainer().offsetWidth;
+      const visibleCenter = (mapW - sidebarW) / 2 + sidebarW;
+      const dx = visibleCenter - mapW / 2;
+      if (Math.abs(dx) > 5) map.panBy([dx, 0]);
+    }
+    showInfo(store);
+  }, 500);
+  // 移动端：点击列表项后关闭抽屉
+  if (isMobile()) {
+    setTimeout(closeDrawer, 600);
+  }
+}
+
+function selectStore(id) {
+  activeIdx = id;
+  document.querySelectorAll('.marker-inner').forEach(el => el.classList.remove('active'));
+  const mk = document.querySelector(`.custom-marker[data-id="${id}"]`);
+  if (mk) {
+    const inner = mk.querySelector('.marker-inner');
+    if (inner) inner.classList.add('active');
+  }
+  renderList();
+}
+
+// =================== 全览 ===================
+function fitAll() {
+  if (allMarkers.length) {
+    map.setFitView(allMarkers, false, [30, 30, 30, 30]);
+  }
+}
+
+// =================== 启动 ===================
+updateStats();
+const waitAMap = () => {
+  if (typeof AMap !== 'undefined' && AMap.Map) {
+    initMap();
+  } else {
+    setTimeout(waitAMap, 200);
+  }
+};
+waitAMap();
+
+// 屏幕旋转 / 尺寸变化时重新适配
+window.addEventListener('resize', () => {
+  if (map) map.resize();
+});
+</script>
+</body>
+</html>

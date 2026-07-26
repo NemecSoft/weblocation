@@ -405,6 +405,10 @@ function initMap() {
   STORES.forEach((s, i) => addMarker(s, i));
   fitAll();
   renderList();
+  // 缩放/平移后重新检测重叠
+  map.on('zoomend', adjustOverlap);
+  map.on('moveend', adjustOverlap);
+  setTimeout(adjustOverlap, 600);
 }
 
 // =================== 添加标记 ===================
@@ -427,6 +431,40 @@ function addMarker(store, idx) {
   });
   marker.setMap(map);
   allMarkers.push(marker);
+}
+
+// =================== 重叠检测：密集区域数字变透明 ===================
+function adjustOverlap() {
+  const ZOOM = map.getZoom();
+  // 缩放级别 <= 12 时处理，>= 13 时恢复全部正常
+  const tooFar = ZOOM >= 13;
+  for (let i = 0; i < allMarkers.length; i++) {
+    const mi = allMarkers[i];
+    const el = mi.getElement();
+    if (!el) continue;
+    const inner = el.querySelector('.marker-inner');
+    if (!inner) continue;
+
+    let overlapped = false;
+    if (!tooFar) {
+      const pi = mi.getPosition();
+      for (let j = 0; j < allMarkers.length; j++) {
+        if (i === j) continue;
+        const mj = allMarkers[j];
+        const pj = mj.getPosition();
+        if (!pi || !pj) continue;
+        const dx = pi.lng - pj.lng;
+        const dy = pi.lat - pj.lat;
+        // 经度0.001°≈89m，纬度0.001°≈111m，两者距离 < 0.002° 视为重叠
+        if (Math.abs(dx) < 0.002 && Math.abs(dy) < 0.002) {
+          overlapped = true;
+          break;
+        }
+      }
+    }
+    inner.style.opacity = overlapped ? '0.25' : '1';
+    inner.style.fontSize = overlapped ? '9px' : '12px';
+  }
 }
 
 // =================== 信息窗 ===================

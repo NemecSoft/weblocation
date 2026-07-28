@@ -8,7 +8,7 @@ set "PATH=%GIT_PATH%;%PATH%"
 
 :: 如果尚未初始化，自动初始化并添加远程仓库
 if not exist ".git" (
-    git init
+    git init -b main
     git remote add origin https://github.com/NemecSoft/weblocation.git
 )
 

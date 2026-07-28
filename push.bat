@@ -19,7 +19,7 @@ set /p msg=modify:
 
 git add .
 git commit -m "%msg%"
-git push
+git push -u origin HEAD
 
 echo.
 echo ok

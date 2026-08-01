@@ -54,6 +54,21 @@
   .sidebar-header .sub { font-size: 11px; opacity: .95; margin-top: 2px; color: #e6ffff; }
   .header-text { flex: 1; }
 
+  /* 顶栏右侧操作区 */
+  .header-actions {
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+  }
+  .theme-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.5);
+    color: #fff; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .theme-btn:hover { background: rgba(0,0,0,0.45); box-shadow: 0 0 12px rgba(0,240,255,0.6); }
+
   /* 名称显示开关 */
   .label-toggle {
     display: flex; align-items: center; gap: 6px;
@@ -352,9 +367,214 @@
     #fabFit, #fabFilter { display: none; }  /* 桌面端用地图自带控件 */
     .map-legend { display: block; }
   }
+
+  /* ============================================================
+     明亮卡通主题（body.light 时启用）
+     ============================================================ */
+  body.light {
+    background: #fff8e7;
+    color: #333;
+  }
+  body.light #sidebar {
+    background: linear-gradient(180deg, #fff8e7 0%, #ffeed1 100%);
+    border-right: 3px solid #ff6b35;
+    box-shadow: 3px 0 18px rgba(255,107,53,0.25);
+  }
+  body.light #backdrop { background: rgba(0,0,0,0.4); }
+  body.light .sidebar-header {
+    background: linear-gradient(135deg, #ff6b35 0%, #ffd93d 60%, #00c2a8 100%);
+    color: #fff;
+    border-bottom: 3px solid #fff;
+    box-shadow: 0 4px 14px rgba(255,107,53,0.35);
+  }
+  body.light .sidebar-header h1 {
+    color: #fff;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  }
+  body.light .sidebar-header .sub { color: #fff; }
+  body.light .theme-btn {
+    background: rgba(255,255,255,0.35);
+    border: 2px solid #fff;
+  }
+  body.light .theme-btn:hover { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+  body.light .label-toggle .switch-label { color: #fff; }
+  body.light .label-toggle.on .switch {
+    background: linear-gradient(135deg, #4d6bfe, #00c2a8);
+    box-shadow: 0 0 8px rgba(77,107,254,0.6);
+  }
+  body.light .label-toggle .switch {
+    background: rgba(255,255,255,0.5);
+    border: 2px solid #fff;
+  }
+
+  body.light .stats {
+    background: #ffeed1;
+    border-bottom: 2px dashed #ffd93d;
+  }
+  body.light .stat-label { color: #8a6d3b; }
+  body.light .stat.s1 .stat-num { color: #ff4d6d; }
+  body.light .stat.s2 .stat-num { color: #4d6bfe; }
+  body.light .stat.s3 .stat-num { color: #ffa000; }
+  body.light .stat.s4 .stat-num { color: #00b26a; }
+
+  body.light .type-stats,
+  body.light .dist-stats {
+    background: #fff8e7;
+    border-bottom: 2px dashed #ffd93d;
+  }
+  body.light .dist-stats .stat,
+  body.light .type-stats .stat {
+    background: #fff;
+    border: 2px solid #f0d9a0;
+  }
+  body.light .dist-stats .stat:hover,
+  body.light .type-stats .stat:hover {
+    background: #fff3d6;
+    box-shadow: 0 2px 8px rgba(255,107,53,0.2);
+  }
+  body.light .dist-stats .stat.active,
+  body.light .type-stats .stat.active {
+    background: linear-gradient(135deg, #4d6bfe 0%, #00c2a8 100%);
+    color: #fff;
+    border-color: #fff;
+    box-shadow: 0 4px 12px rgba(77,107,254,0.35);
+  }
+  body.light .dist-stats .stat.active .stat-num,
+  body.light .dist-stats .stat.active .stat-label,
+  body.light .type-stats .stat.active .stat-num,
+  body.light .type-stats .stat.active .stat-label { color: #fff; }
+  body.light .dist-stats .stat-label,
+  body.light .type-stats .stat-label { color: #8a6d3b; }
+
+  body.light .search-box {
+    background: #fff8e7;
+    border-bottom: 2px dashed #ffd93d;
+  }
+  body.light .search-box input {
+    background: #fff;
+    border: 2px solid #f0d9a0;
+    color: #333;
+  }
+  body.light .search-box input::placeholder { color: #bbb; }
+  body.light .search-box input:focus {
+    border-color: #4d6bfe;
+    box-shadow: 0 0 0 3px rgba(77,107,254,0.15);
+  }
+
+  body.light .filter-chips { background: #fff8e7; border-bottom: 2px dashed #ffd93d; }
+  body.light .chip {
+    background: #fff; color: #8a6d3b;
+    border: 2px solid #f0d9a0;
+  }
+  body.light .chip:hover { background: #ffefd2; }
+  body.light .chip.active {
+    background: linear-gradient(135deg, #ff6b35, #ffd93d);
+    color: #fff;
+    border-color: #ff6b35;
+    box-shadow: 0 2px 8px rgba(255,107,53,0.3);
+  }
+
+  body.light .list-wrap { background: #fff8e7; }
+  body.light .list-wrap::-webkit-scrollbar-track { background: #ffeed1; }
+  body.light .list-wrap::-webkit-scrollbar-thumb { background: #f0d9a0; }
+  body.light .list-item { border-bottom: 2px solid #ffe7c4; }
+  body.light .list-item:hover { background: #ffefd2; }
+  body.light .list-item.active {
+    background: #e6f0ff;
+    border-left: 4px solid #4d6bfe;
+  }
+  body.light .list-item .num {
+    color: #fff;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  body.light .list-item .name { color: #333; }
+  body.light .list-item .dist-tag {
+    background: #e6f0ff; color: #4d6bfe;
+  }
+  body.light .type-tag.t-电竞网咖 { background: #fff0e0; color: #ff6b35; }
+  body.light .type-tag.t-电竞酒店 { background: #e0f6ff; color: #00a2d1; }
+  body.light .type-tag.t-电竞网咖+电竞酒店 { background: #e8fff0; color: #00b26a; }
+  body.light .list-item .addr { color: #8a8a8a; }
+  body.light .empty { color: #c0a878; }
+
+  body.light .marker-inner {
+    color: #fff;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  body.light .marker-inner.active {
+    border-color: #ffd700;
+    box-shadow: 0 0 14px #4d6bfe;
+  }
+  body.light .marker-label {
+    background: rgba(255,255,255,0.92);
+    border: 2px solid #4d6bfe;
+    color: #333;
+    text-shadow: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  body.light .amap-info-content {
+    background: #fff !important;
+    border: 2px solid #4d6bfe !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+  }
+  body.light .amap-info-close { color: #4d6bfe !important; }
+  body.light .iw-name { color: #333; text-shadow: none; }
+  body.light .iw-dist { background: #e6f0ff; color: #4d6bfe; }
+  body.light .iw-addr { color: #666; }
+  body.light .iw-actions a {
+    background: linear-gradient(135deg, #4d6bfe, #00c2a8);
+    color: #fff;
+  }
+  body.light .iw-actions a.alt {
+    background: #e6f0ff; color: #4d6bfe;
+    border: 1px solid #4d6bfe;
+  }
+
+  body.light .fab {
+    background: #fff;
+    border: 2px solid #4d6bfe;
+    box-shadow: 0 4px 12px rgba(77,107,254,0.3);
+    color: #4d6bfe;
+  }
+  body.light .fab:hover { background: #e6f0ff; }
+  body.light #fabFit {
+    background: linear-gradient(135deg, #ff6b35, #ffd93d);
+    color: #fff;
+    border: none;
+  }
+
+  body.light .filter-popup {
+    background: #fff;
+    border: 2px solid #4d6bfe;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+  body.light .popup-title { color: #8a6d3b; }
+  body.light .popup-stats .stat {
+    background: #fff;
+    border: 2px solid #f0d9a0;
+  }
+  body.light .popup-stats .stat:hover { background: #fff3d6; }
+  body.light .popup-stats .stat.active {
+    background: linear-gradient(135deg, #4d6bfe, #00c2a8);
+    color: #fff;
+    border-color: #fff;
+  }
+  body.light .popup-stats .stat.active .stat-num,
+  body.light .popup-stats .stat.active .stat-label { color: #fff; }
+
+  body.light .map-legend {
+    background: rgba(255,255,255,0.95);
+    border: 2px solid #4d6bfe;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  body.light .map-legend h4 { color: #4d6bfe; text-shadow: none; }
+  body.light .legend-item { color: #555; }
 </style>
 </head>
-<body>
+<body class="light">
 <div id="map"></div>
 
 <aside id="sidebar">
@@ -363,9 +583,12 @@
       <h1>⚔️ 钻石版分布</h1>
       <div class="sub" id="totalCount">共 0 家门店 · 点击查看详情</div>
     </div>
-    <div class="label-toggle" id="labelToggle" title="在地图上显示/隐藏门店名称">
-      <span class="switch-label">地图显示名称</span>
-      <span class="switch"></span>
+    <div class="header-actions">
+      <button class="theme-btn" id="themeBtn" title="切换明亮 / 赛博朋克主题">🌙</button>
+      <div class="label-toggle" id="labelToggle" title="在地图上显示/隐藏门店名称">
+        <span class="switch-label">地图显示名称</span>
+        <span class="switch"></span>
+      </div>
     </div>
   </div>
   <div class="stats type-stats">
@@ -597,10 +820,11 @@ document.getElementById('fabFilter').addEventListener('click', () => {
 
 // =================== 地图初始化 ===================
 function initMap() {
+  const light = document.body.classList.contains('light');
   map = new AMap.Map('map', {
     center: [101.78, 36.63],
     zoom: 12,
-    mapStyle: 'amap://styles/dark',
+    mapStyle: light ? 'amap://styles/light' : 'amap://styles/dark',
     features: ['bg','road','point']
   });
 
@@ -652,6 +876,19 @@ document.getElementById('labelToggle').addEventListener('click', () => {
   showLabels = !showLabels;
   document.getElementById('labelToggle').classList.toggle('on', showLabels);
   setLabelVisibility(showLabels);
+});
+
+// =================== 主题切换 ===================
+function applyTheme(light) {
+  document.body.classList.toggle('light', light);
+  document.getElementById('themeBtn').textContent = light ? '🌙' : '🌞';
+  // 切换地图配色
+  if (map) {
+    map.setMapStyle(light ? 'amap://styles/light' : 'amap://styles/dark');
+  }
+}
+document.getElementById('themeBtn').addEventListener('click', () => {
+  applyTheme(!document.body.classList.contains('light'));
 });
 
 // =================== 信息窗 ===================

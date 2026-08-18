@@ -721,6 +721,9 @@ let showLabels = false;  // 是否在地图上显示门店名称
 const TYPE_EMOJI = { '电竞网咖':'⚔️', '电竞酒店':'🏨', '电竞网咖+电竞酒店':'⚔️🏨' };
 const typeEmoji = t => TYPE_EMOJI[t] || '🏷️';
 
+// =================== 区域排序（列表固定顺序：城中→城北→城西→城东） ===================
+const DIST_ORDER = { '城中区': 0, '城北区': 1, '城西区': 2, '城东区': 3 };
+
 // =================== 统计 ===================
 function updateStats() {
   const c = { '城中区':0,'城西区':0,'城东区':0,'城北区':0 };
@@ -745,22 +748,26 @@ function updateStats() {
 // =================== 渲染列表 ===================
 function renderList() {
   const wrap = document.getElementById('listWrap');
+  // 过滤后统一按"区域（城中→城北→城西→城东）→ 名称"排序，不受 STORES 原始顺序影响
   const filtered = STORES.filter(s => {
     const okType = currentFilter === 'all' || s.type === currentFilter;
     const okDist = currentFilterDist === 'all' || s.dist === currentFilterDist;
     const okSearch = !currentSearch || s.name.includes(currentSearch) || s.addr.includes(currentSearch);
     return okType && okDist && okSearch;
+  }).sort((a, b) => {
+    const d = (DIST_ORDER[a.dist] ?? 99) - (DIST_ORDER[b.dist] ?? 99);
+    return d !== 0 ? d : a.name.localeCompare(b.name, 'zh-CN');
   });
   if (!filtered.length) {
     wrap.innerHTML = '<div class="empty">暂无匹配的门店</div>';
     return;
   }
-  wrap.innerHTML = filtered.map(s => {
+  wrap.innerHTML = filtered.map((s, i) => {
     const idx = STORES.indexOf(s);
     return `
     <div class="list-item ${idx === activeIdx ? 'active' : ''}" data-id="${idx}" onclick="focusStore(${idx})">
       <div class="row1">
-        <span class="num d-${s.dist}">${idx + 1}</span>
+        <span class="num d-${s.dist}">${i + 1}</span>
         <span class="name">${s.name}</span>
         <span class="type-tag t-${s.type}">${typeEmoji(s.type)} ${s.type}</span>
         <span class="dist-tag">${s.dist}</span>

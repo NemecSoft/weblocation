@@ -111,14 +111,14 @@
   .stat.s3 .stat-num { color: #ffd700; }
   .stat.s4 .stat-num { color: #00e676; }
 
-  /* 类型统计（可点击卡片式筛选） */
+  /* 类型统计(可点击卡片式筛选) */
   .type-stats {
     background: #0d1321;
     padding: 10px 14px;
     border-bottom: 1px solid rgba(0,240,255,0.15);
     gap: 6px;
   }
-  /* 区域统计（可点击卡片式筛选） */
+  /* 区域统计(可点击卡片式筛选) */
   .dist-stats {
     background: #0d1321;
     padding: 10px 14px;
@@ -313,7 +313,7 @@
   .iw-actions a.alt { background: rgba(0,240,255,0.1); color: #00f0ff; border: 1px solid rgba(0,240,255,0.3); }
   .iw-actions a.alt:hover { background: rgba(0,240,255,0.2); }
 
-  /* ========== 浮动按钮（FAB） ========== */
+  /* ========== 浮动按钮(FAB) ========== */
   .fab {
     position: absolute; z-index: 998;
     width: 46px; height: 46px; border-radius: 50%;
@@ -355,7 +355,7 @@
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #9fb4d8; margin-bottom: 1px; }
   .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
 
-  /* ========== 桌面端样式（≥768px） ========== */
+  /* ========== 桌面端样式(≥768px) ========== */
   @media (min-width: 768px) {
     #sidebar {
       transform: translateX(0);  /* 桌面端默认显示 */
@@ -369,7 +369,7 @@
   }
 
   /* ============================================================
-     明亮卡通主题（body.light 时启用）
+     明亮卡通主题(body.light 时启用)
      ============================================================ */
   body.light {
     background: #fff8e7;
@@ -677,37 +677,36 @@
 
 <script src="https://webapi.amap.com/maps?v=2.0&key=a01878acdecff250a4b69513defde872&plugin=AMap.ToolBar,AMap.Scale"></script>
 <script>
-// =================== 门店数据（含坐标 - 高德POI校正） ===================
-const STORES = [
-  
+// =================== 门店数据(含坐标 - 高德POI校正) ===================
+const STORES = [  
   { name:'爱陌香格里拉店',                addr:'城中区香格里拉路 香格里拉城市花园6期',        dist:'城中区', type:'电竞网咖', lat:36.606, lng:101.754 },
-  { name:'爱陌电竞极致体验馆',                addr:'香格里拉商业中心',        dist:'城中区', type:'电竞网咖', lat:36.6066, lng:101.7546 },
-  { name:'奥朵电竞酒店',                  addr:'城中区南山路15号1号楼1121号',                dist:'城中区', type:'电竞酒店', lat:36.607, lng:101.782 },
-  //{ name:'水沐清泉电竞酒店',               addr:'城西区五四西路71-197号',                     dist:'城西区', type:'电竞酒店', lat:36.6463, lng:101.708 },
-  { name:'巅峰电竞王府井店',               addr:'城西区西大街40号王府井B馆5楼',                dist:'城西区', type:'电竞网咖', lat:36.6212, lng:101.7775 },
-  { name:'横贯电竞歪歪楼店',               addr:'城西区五四西路75号1号楼二层 歪歪楼',           dist:'城西区', type:'电竞网咖', lat:36.6463, lng:101.706 },
-  { name:'北川横贯店',                     addr:'城北区北川万达广场2层 横贯电竞(北川万达大学城店)', dist:'城北区', type:'电竞网咖', lat:36.6953, lng:101.7635 },
+  { name:'巅峰电竞精领酒店(梵天总店)', addr:'城西区古城台街道同仁路46号万兴大厦',     dist:'城西区', type:'电竞网咖+电竞酒店', lat:36.623, lng:101.7615 },
+  { name:'义乌网咖(西钢店)',               addr:'城北区柴达木路52号',                          dist:'城北区', type:'电竞网咖', lat:36.664, lng:101.6758 },
+  { name:'义乌网咖(民惠城店)',               addr:'城北区门源路10号',                            dist:'城北区', type:'电竞网咖', lat:36.6522, lng:101.7666 },
+  { name:'义乌网咖(尚城店)',               addr:'城北区朝阳东路57号',                          dist:'城北区', type:'电竞网咖', lat:36.6659, lng:101.7654 },
   { name:'星慕电竞酒店',                   addr:'城东区金都大厦2号楼',                        dist:'城东区', type:'电竞酒店', lat:36.6235, lng:101.7916 },
-  { name:'鹊踏枝电竞酒店',                 addr:'城东区建国大街57号东区2A号楼24层',            dist:'城东区', type:'电竞酒店', lat:36.6049, lng:101.7985 },
-  { name:'PG电竞酒店',                     addr:'城东区七一东路锦峰滨河苑21号楼B座16层',      dist:'城东区', type:'电竞酒店', lat:36.6076, lng:101.8142 },  
-  { name:'义乌网咖（西钢店）',               addr:'城北区柴达木路52号',                          dist:'城北区', type:'电竞网咖', lat:36.664, lng:101.6758 },
-  { name:'义乌网咖（民惠城店）',               addr:'城北区门源路10号',                            dist:'城北区', type:'电竞网咖', lat:36.6522, lng:101.7666 },
-  { name:'义乌网咖（尚城店）',               addr:'城北区朝阳东路57号',                          dist:'城北区', type:'电竞网咖', lat:36.6659, lng:101.7654 },
-  { name:'义乌中海店',                     addr:'城北区中海河山郡西区(门源路北50米)',            dist:'城北区', type:'电竞网咖', lat:36.6520, lng:101.7472 },
-  { name:'心极速网吧',                    addr:'城中区南京路42号',                          dist:'城中区', type:'电竞网咖', lat:36.549, lng:101.713 },
-  { name:'元泊电竞',                    addr:'城北区纬三路紫御澜庭1号楼3层',                          dist:'城北区', type:'电竞网咖', lat:36.6850, lng:101.7538 },
-  { name:'赛铂电竞(新千店)',                addr:'城中区建国南路66号新千国际广场20号楼F5层',   dist:'城中区', type:'电竞网咖', lat:36.606, lng:101.798 },
-  { name:'凡天电竞（胜利路店）胜利路巅峰',   addr:'城中区同仁路46号万兴大厦1号楼',              dist:'城中区', type:'电竞网咖', lat:36.626, lng:101.762 },
- // { name:'弈客电竞',                     addr:'城西区西关大街84号2号楼84-8号',               dist:'城西区', type:'电竞网咖', lat:36.6343, lng:101.744 },
-  { name:'横贯电竞（海湖店）',                  addr:'城西区五四西路唐道637步行街B3-402商铺',       dist:'城西区', type:'电竞网咖', lat:36.6435, lng:101.718 },
+  { name:'横贯电竞(海湖店)',                  addr:'城西区五四西路唐道637步行街B3-402商铺',       dist:'城西区', type:'电竞网咖', lat:36.6435, lng:101.718 },
+  { name:'横贯电竞(夏都店)',                   addr:'城东区夏都大街188号喆啡酒店东区负1层',       dist:'城东区', type:'电竞网咖', lat:36.6112, lng:101.7942 },
   { name:'横贯电竞(海湖万达五矿巅峰店)',    addr:'城西区五四西路66号4号楼2层66-254、66-256号', dist:'城西区', type:'电竞网咖', lat:36.6448, lng:101.7225 },
-  { name:'凡天网咖（万达店）巅峰',           addr:'城西区海湖万达4楼 卓威电竞巅峰电竞',           dist:'城西区', type:'电竞网咖', lat:36.6425, lng:101.7165 },
-  { name:'赛铂电竞(力盟店)',               addr:'城西区五四大街41号力盟商业巷步行街7号楼2楼202', dist:'城西区', type:'电竞网咖', lat:36.6285, lng:101.7578 },
+  { name:'凡天网咖(万达店)巅峰电竞',           addr:'城西区海湖万达4楼 卓威电竞巅峰电竞',           dist:'城西区', type:'电竞网咖', lat:36.6425, lng:101.7165 },
+    { name:'心极速网吧',                    addr:'城中区南京路42号',                          dist:'城中区', type:'电竞网咖', lat:36.549, lng:101.713 },
+  { name:'鹊踏枝电竞酒店',                 addr:'城东区建国大街57号东区2A号楼24层',            dist:'城东区', type:'电竞酒店', lat:36.6049, lng:101.7985 },
+  { name:'凡天电竞(胜利路店)巅峰电竞',   addr:'城中区同仁路46号万兴大厦1号楼',              dist:'城中区', type:'电竞网咖', lat:36.626, lng:101.762 },
+  { name:'奥朵电竞酒店',                  addr:'城中区南山路15号1号楼1121号',                dist:'城中区', type:'电竞酒店', lat:36.607, lng:101.782 },
+  { name:'赛铂电竞(新千店)',                addr:'城中区建国南路66号新千国际广场20号楼F5层',   dist:'城中区', type:'电竞网咖', lat:36.606, lng:101.798 },
+  { name:'赛铂电竞(力盟店)',               addr:'城西区五四大街41号力盟商业巷步行街7号楼2楼202', dist:'城西区', type:'电竞网咖', lat:36.6285, lng:101.7578 },  
+  { name:'义乌网咖(中海店)',                     addr:'城北区中海河山郡西区(门源路北50米)',            dist:'城北区', type:'电竞网咖', lat:36.6520, lng:101.7472 },
+  { name:'巅峰电竞(新华百货)',                   addr:'城西区五四大街45号新华百货CCmall BT馆4F',     dist:'城西区', type:'电竞网咖', lat:36.630, lng:101.7575 },
+  { name:'爱陌电竞极致体验馆',                addr:'香格里拉商业中心',        dist:'城中区', type:'电竞网咖', lat:36.6066, lng:101.7546 },
+  { name:'PG电竞酒店',                     addr:'城东区七一东路锦峰滨河苑21号楼B座16层',      dist:'城东区', type:'电竞酒店', lat:36.6076, lng:101.8142 },  
+  { name:'巅峰电竞(王府井店)',               addr:'城西区西大街40号王府井B馆5楼',                dist:'城西区', type:'电竞网咖', lat:36.6212, lng:101.7775 },  
+  { name:'横贯电竞(北川店)',                     addr:'城北区北川万达广场2层 横贯电竞(北川万达大学城店)', dist:'城北区', type:'电竞网咖', lat:36.6953, lng:101.7635 },
+  { name:'横贯电竞歪歪楼店',               addr:'城西区五四西路75号1号楼二层 歪歪楼',           dist:'城西区', type:'电竞网咖', lat:36.6463, lng:101.706 },  
   { name:'力盟超级综合体新店',               addr:'万和电竞的3楼', dist:'城西区', type:'电竞网咖', lat:36.6295, lng:101.7578 },
-  { name:'新华百货巅峰',                   addr:'城西区五四大街45号新华百货CCmall BT馆4F',     dist:'城西区', type:'电竞网咖', lat:36.630, lng:101.7575 },
-  { name:'横贯（夏都店）',                   addr:'城东区夏都大街188号喆啡酒店东区负1层',       dist:'城东区', type:'电竞网咖', lat:36.6112, lng:101.7942 },
   { name:'竞界超级电竞馆',                   addr:'青海省西宁市城东区东关大街街道东关大街96-2',       dist:'城东区', type:'电竞网咖', lat:36.6190, lng:101.7922 },  
-  { name:'凡天电竞（宜博总店）精领酒店二医院巅峰', addr:'城西区古城台街道同仁路46号万兴大厦',     dist:'城西区', type:'电竞网咖+电竞酒店', lat:36.623, lng:101.7615 }
+  { name:'元泊电竞',                    addr:'城北区纬三路紫御澜庭1号楼3层',                          dist:'城北区', type:'电竞网咖', lat:36.6850, lng:101.7538 },
+  //{ name:'水沐清泉电竞酒店',               addr:'城西区五四西路71-197号',                     dist:'城西区', type:'电竞酒店', lat:36.6463, lng:101.708 }, 
+ // { name:'弈客电竞',                     addr:'城西区西关大街84号2号楼84-8号',               dist:'城西区', type:'电竞网咖', lat:36.6343, lng:101.744 },
 ];
 
 // =================== 状态 ===================
@@ -720,7 +719,7 @@ let showLabels = false;  // 是否在地图上显示门店名称
 const TYPE_EMOJI = { '电竞网咖':'⚔️', '电竞酒店':'🏨', '电竞网咖+电竞酒店':'⚔️🏨' };
 const typeEmoji = t => TYPE_EMOJI[t] || '🏷️';
 
-// =================== 区域排序（列表固定顺序：城中→城北→城西→城东） ===================
+// =================== 区域排序(列表固定顺序：城中→城北→城西→城东) ===================
 const DIST_ORDER = { '城中区': 0, '城北区': 1, '城西区': 2, '城东区': 3 };
 
 // =================== 统计 ===================
@@ -747,7 +746,7 @@ function updateStats() {
 // =================== 渲染列表 ===================
 function renderList() {
   const wrap = document.getElementById('listWrap');
-  // 过滤后统一按"区域（城中→城北→城西→城东）→ 名称"排序，不受 STORES 原始顺序影响
+  // 过滤后统一按"区域(城中→城北→城西→城东)→ 名称"排序，不受 STORES 原始顺序影响
   const filtered = STORES.filter(s => {
     const okType = currentFilter === 'all' || s.type === currentFilter;
     const okDist = currentFilterDist === 'all' || s.dist === currentFilterDist;
@@ -780,7 +779,7 @@ document.getElementById('searchInput').addEventListener('input', e => {
   currentSearch = e.target.value.trim();
   renderList();
 });
-// 类型筛选（卡片式统计）
+// 类型筛选(卡片式统计)
 function selectTypeFilter(type, el) {
   currentFilter = type;
   // 同步侧边栏 + 弹层 + 移动端弹层的高亮态
@@ -793,7 +792,7 @@ function selectTypeFilter(type, el) {
     document.getElementById('filterPopup').classList.remove('open');
   }
 }
-// 区域筛选（卡片式统计）
+// 区域筛选(卡片式统计)
 function selectDistFilter(dist, el) {
   currentFilterDist = dist;
   document.querySelectorAll('.dist-stats .stat').forEach(x => {
